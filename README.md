@@ -1,1 +1,1 @@
-# payment-provider-datatrans
+# Pimcore E-Commerce Framework Payment Provider - Datatrans

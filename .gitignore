@@ -1,0 +1,32 @@
+# symfony default
+/.web-server-pid
+/config/pimcore/parameters.yml
+/build/
+/phpunit.xml
+/public/bundles/
+
+# local config
+/.env.local
+/.env.local.php
+/.env.*.local
+!/config/local
+/config/local/*
+!config/local/.gitkeep
+
+# PHP-CS-Fixer
+.php_cs.cache
+.php-cs-fixer.cache
+
+# PHP Unit
+.phpunit.result.cache
+
+# composer
+/vendor/
+
+# npm
+/node_modules
+
+# PhpStorm / IDEA
+.idea
+# NetBeans
+nbproject

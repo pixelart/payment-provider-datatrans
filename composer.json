@@ -1,0 +1,33 @@
+{
+  "name": "pixelart/payment-provider-datatrans",
+  "license": "GPL-3.0+",
+  "type": "pimcore-bundle",
+  "description": "Pimcore Payment Provider - Datatrans",
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "phpro/grumphp-shim": true
+    }
+  },
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "require": {
+    "pimcore/pimcore": "^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pixelart\\PaymentProviderDatatransBundle\\": "src/"
+    }
+  },
+  "extra": {
+    "pimcore": {
+      "bundles": [
+        "Pixelart\\PaymentProviderDatatransBundle"
+      ]
+    }
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.40",
+    "phpro/grumphp-shim": "^2.3"
+  }
+}

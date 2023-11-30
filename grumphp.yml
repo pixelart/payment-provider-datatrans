@@ -1,0 +1,7 @@
+grumphp:
+    tasks:
+        phpcsfixer:
+            config: .php-cs-fixer.php
+    ascii:
+        failed: grumphp-grumpy.txt
+        succeeded: grumphp-happy.txt

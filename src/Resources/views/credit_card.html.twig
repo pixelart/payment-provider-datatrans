@@ -1,0 +1,71 @@
+<script src="https://pay.sandbox.datatrans.com/upp/payment/js/secure-fields-2.0.0.min.js"></script>
+
+{# documentation: https://docs.datatrans.ch/docs/secure-fields-options #}
+<form id="cc_form" method="post" style="width: 500px;margin: auto;">
+    <input type="hidden" id="cc_redirect" name="redirect" value="" />
+    <input type="hidden" id="cc_transactionId" name="uppTransactionId" value="" />
+    <div>
+        <div>
+            <label for="cardNumberPlaceholder">Card Number</label>
+            <!-- card number container -->
+            <div id="cardNumberPlaceholder" style="width: 500px; height: 50px; margin-bottom: 20px;"></div>
+        </div>
+        <div>
+            <label for="cvvPlaceholder">Cvv</label>
+            <!-- cvv container -->
+            <div id="cvvPlaceholder" style="width: 100px; height: 50px; margin-bottom: 20px;"></div>
+        </div>
+        <button type="button" id="pay-button">Pay!</button>
+    </div>
+</form>
+
+<script type="text/javascript">
+    var secureFields = new SecureFields();
+    secureFields.init(
+        "{{ transaction_id }}",
+        {
+            cardNumber: "cardNumberPlaceholder",
+            cvv: "cvvPlaceholder",
+        },
+        {
+            focus: "cardNumber",
+        }
+    );
+    secureFields.on("ready", function() {
+        secureFields.setStyle("cardNumber","border: 1px solid #888; width: 400px; height: 50px;");
+        secureFields.setStyle("cvv","border: 1px solid #888; height: 50px;");
+
+        // Placeholder for the card number field
+        secureFields.setPlaceholder("cardNumber", "Card Number");
+
+        // Placeholder for the card security number
+        secureFields.setPlaceholder("cvv", "CVV Code");
+    });
+    secureFields.on("validate", function(event) {
+        console.log("validate", event);
+        // Add a red border if a field is invalid
+        secureFields.setStyle("cardNumber.invalid","border: 1px solid #f00");
+        secureFields.setStyle("cvv.invalid","border: 1px solid #f00");
+    });
+    secureFields.on("success", function(data) {
+        console.log("success", data.transactionId);
+        if (data.redirect) {
+            document.getElementById('cc_redirect').value = data.redirect;
+        }
+        document.getElementById('cc_transactionId').value = "{{ transaction_id }}";
+        document.getElementById('cc_form').submit();
+    });
+    secureFields.on("change", function(event) {
+        // @todo
+    });
+    secureFields.on("error", function(data) {
+        console.log("error", data);
+    });
+    document.getElementById("pay-button").onclick = function(){
+        console.log("submit");
+        secureFields.submit({
+            expm: 06, // ask for the expiry month in your form
+            expy: 25 // ask for the expiry year in your form
+        });
+    };
+</script>

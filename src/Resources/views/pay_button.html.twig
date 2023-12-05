@@ -1,0 +1,57 @@
+<script src="{{ script }}"></script>
+
+<div id="paybutton"></div>
+
+<script type="text/javascript">
+    const payment = {
+        // W3C
+        details: {
+            total: {
+                label: "Gesamtbetrag (inkl. MwSt.)", // @todo translation
+                amount: { value: "{{ total }}", currency: "{{ currency }}" },
+            },
+            displayItems: {{ display_items|json_encode|raw }},
+        },
+        options: {
+            requestPayerEmail: true,
+            requestPayerName: true,
+            requestPayerPhone: false,
+            requestShipping: false
+        },
+        // Datatrans
+        transaction: {
+            countryCode: "{{ country }}",
+            refno: "{{ refno }}"
+        }
+    };
+
+    allowedCardNetworks = [];
+    {% for card in allowed_cards %}
+        allowedCardNetworks.push("{{ card }}");
+    {% endfor %}
+
+    PaymentButton.init({
+        merchantId: '',
+        merchantName: '',
+        tokenOnly: false,
+        autoSettle: false,
+        allowedCardNetworks: allowedCardNetworks,
+        googlePayConfiguration: {
+            buttonType: "long",
+            buttonStyle: "black",
+            merchantId: "{{ merchant_id }}"
+        },
+        applePayConfiguration: {
+            buttonType: "plain",
+            buttonStyle: "black"
+        }
+    });
+
+    PaymentButton.on("init", function () {
+        PaymentButton.create(document.getElementById('paybutton'), payment)
+    });
+
+    PaymentButton.on("authorization", function (response) {
+        // handle transaction result
+    });
+</script>

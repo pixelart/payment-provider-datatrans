@@ -10,7 +10,7 @@ services:
             - '../../DependencyInjection/'
 
     # Controllers
-    Pixelart\PaymentProviderDatatrans\Controller\:
+    Pixelart\PaymentProviderDatatransBundle\Controller\:
         resource: '../../Controller'
         public: true
         tags: ['controller.service_arguments']

@@ -23,16 +23,43 @@ declare(strict_types=1);
 
 namespace Pixelart\PaymentProviderDatatransBundle\PaymentManager\V7\Payment\StartPaymentRequest;
 
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentRequest\AbstractRequest;
+
 class DatatransRequest extends AbstractRequest
 {
+    protected $paymentMethod;
+    protected $returnUrl;
     protected $reqtype;
     protected $refno;
     protected $language;
-    protected $successUrl;
     protected $errorUrl;
     protected $cancelUrl;
-    protected $uppStartTarget;
     protected $useAlias;
+    protected $merchantName;
+
+    public function setPaymentMethod($paymentMethod): self
+    {
+        $this->paymentMethod = $paymentMethod;
+
+        return $this;
+    }
+
+    public function getPaymentMethod()
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setReturnUrl($returnUrl): self
+    {
+        $this->returnUrl = $returnUrl;
+
+        return $this;
+    }
+
+    public function getReturnUrl()
+    {
+        return $this->returnUrl;
+    }
 
     /**
      * @return mixed
@@ -45,9 +72,11 @@ class DatatransRequest extends AbstractRequest
     /**
      * @param mixed $reqtype
      */
-    public function setReqtype($reqtype): void
+    public function setReqtype($reqtype): self
     {
         $this->reqtype = $reqtype;
+
+        return $this;
     }
 
     /**
@@ -61,9 +90,11 @@ class DatatransRequest extends AbstractRequest
     /**
      * @param mixed $refno
      */
-    public function setRefno($refno): void
+    public function setRefno($refno): self
     {
         $this->refno = $refno;
+
+        return $this;
     }
 
     /**
@@ -77,25 +108,11 @@ class DatatransRequest extends AbstractRequest
     /**
      * @param mixed $language
      */
-    public function setLanguage($language): void
+    public function setLanguage($language): self
     {
         $this->language = $language;
-    }
 
-    /**
-     * @return mixed
-     */
-    public function getSuccessUrl()
-    {
-        return $this->successUrl;
-    }
-
-    /**
-     * @param mixed $successUrl
-     */
-    public function setSuccessUrl($successUrl): void
-    {
-        $this->successUrl = $successUrl;
+        return $this;
     }
 
     /**
@@ -109,9 +126,11 @@ class DatatransRequest extends AbstractRequest
     /**
      * @param mixed $errorUrl
      */
-    public function setErrorUrl($errorUrl): void
+    public function setErrorUrl($errorUrl): self
     {
         $this->errorUrl = $errorUrl;
+
+        return $this;
     }
 
     /**
@@ -125,25 +144,11 @@ class DatatransRequest extends AbstractRequest
     /**
      * @param mixed $cancelUrl
      */
-    public function setCancelUrl($cancelUrl): void
+    public function setCancelUrl($cancelUrl): self
     {
         $this->cancelUrl = $cancelUrl;
-    }
 
-    /**
-     * @return mixed
-     */
-    public function getUppStartTarget()
-    {
-        return $this->uppStartTarget;
-    }
-
-    /**
-     * @param mixed $uppStartTarget
-     */
-    public function setUppStartTarget($uppStartTarget): void
-    {
-        $this->uppStartTarget = $uppStartTarget;
+        return $this;
     }
 
     /**
@@ -157,8 +162,22 @@ class DatatransRequest extends AbstractRequest
     /**
      * @param mixed $useAlias
      */
-    public function setUseAlias($useAlias): void
+    public function setUseAlias($useAlias): self
     {
         $this->useAlias = $useAlias;
+
+        return $this;
+    }
+
+    public function setMerchantName($merchantName): self
+    {
+        $this->merchantName = $merchantName;
+
+        return $this;
+    }
+
+    public function getMerchantName(): string
+    {
+        return $this->merchantName;
     }
 }

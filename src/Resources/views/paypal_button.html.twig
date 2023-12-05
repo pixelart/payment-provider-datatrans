@@ -1,0 +1,39 @@
+<script src="{{ script }}" type="text/javascript"></script>
+
+<div id="paypalbutton"></div>
+
+<script type="text/javascript">
+    PayPalButton.init({
+        merchantId: '{{ merchant_id }}', // @todo set real merchant ID from yaml config or builder
+        currencyCode: '{{ currency }}',
+        amount: '{{ total }}',
+        autoSettle: true,
+        createAlias: false,
+        reqType: 'CAA'
+    });
+
+    const configuration = {
+        paypaloptions: {
+            button: {
+                layout: 'vertical',
+                color: 'blue',
+                shape: 'rect',
+                label: 'paypal'
+            }
+        },
+        transaction: {
+            refno: "{{ refno }}",
+            authenticationOnly: false,
+            returnAddress: false
+        }
+    }
+
+    PayPalButton.on("init", function () {
+        PayPalButton.create(document.getElementById('paypalbutton'), configuration)
+    });
+
+    PayPalButton.on("authorization", function (data) {
+        // handle transaction result
+        console.log(data);
+    });
+</script>

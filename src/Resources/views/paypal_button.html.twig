@@ -1,12 +1,12 @@
 <script src="{{ script }}" type="text/javascript"></script>
 
-<div id="paypalbutton"></div>
+<div id="paypalbutton" style="width: 400px; margin: 100px auto;"></div>
 
 <script type="text/javascript">
     PayPalButton.init({
         merchantId: '{{ merchant_id }}', // @todo set real merchant ID from yaml config or builder
         currencyCode: '{{ currency }}',
-        amount: '{{ total }}',
+        amount: "35,50",
         autoSettle: true,
         createAlias: false,
         reqType: 'CAA'

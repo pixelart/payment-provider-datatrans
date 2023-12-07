@@ -69,21 +69,34 @@ class Datatrans extends AbstractPayment implements PaymentInterface
 
     public function signUrl($url): string
     {
+        // parse url
         $query = parse_url($url, PHP_URL_QUERY);
         parse_str($query ?: '', $query);
 
+        // remove signature parameters
         unset($query['timestamp'], $query['signature']);
 
-        $query['timestamp'] = time();
-        $unsignedUrl = strtok($url, '?').'?'.http_build_query($query);
+        $params = [];
+        if ($query['orderIdent'] ?? null) {
+            $params['orderIdent'] = $query['orderIdent'];
+        }
+        $params['timestamp'] = time();
 
-        $query['signature'] = hash_hmac('sha256', $unsignedUrl, $this->sign);
+        $unsignedUrl = strtok($url, '?').'?'.http_build_query($params);
 
-        return strtok($url, '?').'?'.http_build_query($query);
+        $params['signature'] = hash_hmac('sha256', $unsignedUrl, $this->sign);
+
+        return strtok($url, '?').'?'.http_build_query($params);
     }
 
     public function checkSignature($url): bool
     {
+        /**
+         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
+         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
+         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
+         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
+         */
         $query = parse_url($url, PHP_URL_QUERY);
         parse_str($query, $query);
 

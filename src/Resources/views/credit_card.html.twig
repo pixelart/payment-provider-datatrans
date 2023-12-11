@@ -1,5 +1,7 @@
 <script src="https://pay.sandbox.datatrans.com/upp/payment/js/secure-fields-2.0.0.min.js"></script>
 
+<div>NOTE: For testing use expiration Month and Year 06/25</div>
+
 {# documentation: https://docs.datatrans.ch/docs/secure-fields-options #}
 <form id="cc_form" method="post" style="width: 500px;margin: auto;">
     <input type="hidden" id="cc_redirect" name="redirect" value="" />
@@ -9,6 +11,17 @@
             <label for="cardNumberPlaceholder">Card Number</label>
             <!-- card number container -->
             <div id="cardNumberPlaceholder" style="width: 500px; height: 50px; margin-bottom: 20px;"></div>
+        </div>
+        <div>
+            <label for="expiryMonthPlaceholder">Expiry Month</label>
+            <div id="expiryMonthPlaceholder" style="width: 100px; height: 50px; margin-bottom: 20px;">
+                <input type="text" id="expiryMonth" />
+            </div>
+
+            <label for="expiryYearPlaceholder">Expiry Year</label>
+            <div id="expiryYearPlaceholder" style="width: 100px; height: 50px; margin-bottom: 20px;">
+                <input type="text" id="expiryYear" />
+            </div>
         </div>
         <div>
             <label for="cvvPlaceholder">Cvv</label>
@@ -61,11 +74,13 @@
     secureFields.on("error", function(data) {
         console.log("error", data);
     });
-    document.getElementById("pay-button").onclick = function(){
+    document.getElementById("pay-button").onclick = function() {
         console.log("submit");
+        var expmonth = document.getElementById("expiryMonth").value;
+        var expyear = document.getElementById("expiryYear").value;
         secureFields.submit({
-            expm: 06, // ask for the expiry month in your form
-            expy: 25 // ask for the expiry year in your form
+            expm: expmonth,
+            expy: expyear,
         });
     };
 </script>

@@ -67,19 +67,20 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         return 'Datatrans';
     }
 
+    /*
+     * Sign a URL.
+     *
+     * Only the query params 'orderIdent' and 'uppTransactionId' are to be signed to protect abuse. Other params don't matter.
+     */
     public function signUrl($url): string
     {
         // parse url
         $query = parse_url($url, PHP_URL_QUERY);
         parse_str($query ?: '', $query);
 
-        // remove signature parameters
-        unset($query['timestamp'], $query['signature']);
-
         $params = [];
-        if ($query['orderIdent'] ?? null) {
-            $params['orderIdent'] = $query['orderIdent'];
-        }
+        $params['orderIdent'] = $query['orderIdent'] ?? null;
+        $params['uppTransactionId'] = $query['uppTransactionId'] ?? null;
         $params['timestamp'] = time();
 
         $unsignedUrl = strtok($url, '?').'?'.http_build_query($params);
@@ -91,12 +92,6 @@ class Datatrans extends AbstractPayment implements PaymentInterface
 
     public function checkSignature($url): bool
     {
-        /**
-         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
-         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
-         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
-         * @todo check if signature is valid using only the raw URL with orderIdent and timestamp
-         */
         $query = parse_url($url, PHP_URL_QUERY);
         parse_str($query, $query);
 
@@ -106,10 +101,13 @@ class Datatrans extends AbstractPayment implements PaymentInterface
 
         $timestamp = $query['timestamp'];
         $signature = $query['signature'];
-        unset($query['timestamp'], $query['signature']);
-        $query['timestamp'] = $timestamp;
 
-        $unsignedUrl = strtok($url, '?').'?'.http_build_query($query);
+        $params = [];
+        $params['orderIdent'] = $query['orderIdent'] ?? null;
+        $params['uppTransactionId'] = $query['uppTransactionId'] ?? null;
+        $params['timestamp'] = $timestamp;
+
+        $unsignedUrl = strtok($url, '?').'?'.http_build_query($params);
 
         return $signature === hash_hmac('sha256', $unsignedUrl, $this->sign);
     }
@@ -160,6 +158,11 @@ class Datatrans extends AbstractPayment implements PaymentInterface
             }
 
             /**
+             * @todo
+             * @todo
+             * @todo
+             * @todo
+             * @todo
              * @todo add shipping from price modifications to $displayItems[]
              * @todo add discount from price modifications to $displayItems[]
              */
@@ -275,7 +278,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                     'currency' => $price->getCurrency()->getShortName(),
                     'refno' => $refNo,
                     'customer' => [
-                        'country' => $order->getCustomerCountry() ?: 'AT', // @todo remove the default AT
+                        'country' => $order->getCustomerCountry(),
                     ],
                     'language' => $config->getLanguage() ?? 'en',
                     'paymentMethods' => ['KLN'],
@@ -303,11 +306,10 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         $transactionId = $response['datatransTrxId'] ?? $response['uppTransactionId'];
         $refNo = $response['orderIdent'];
 
-        // @todo validate signed URLs (issue with Klarna adding extra parameters to the URL upon return.... need to validate only the URL without query params).
-        //        $url = $this->requestStack->getMainRequest()?->getUri();
-        //        if (!$this->checkSignature($url)) {
-        //            throw new InvalidSignatureException('Invalid signature.');
-        //        }
+        $url = $this->requestStack->getMainRequest()?->getUri();
+        if (!$this->checkSignature($url)) {
+            throw new InvalidSignatureException('Invalid signature.');
+        }
 
         try {
             $transaction = $this->client->request('GET', $this->urls['api'].'/v1/transactions/'.$transactionId, [
@@ -475,11 +477,22 @@ class Datatrans extends AbstractPayment implements PaymentInterface
     {
         parent::configureOptions($resolver);
 
-        $resolver->setRequired([
-            'merchant_id',
-            'password',
-            'sign',
-        ]);
+        $resolver->setRequired([]);
+
+        $resolver
+            ->setDefault('merchant_id', '')
+            ->setAllowedTypes('merchant_id', ['string'])
+        ;
+
+        $resolver
+            ->setDefault('password', '')
+            ->setAllowedTypes('password', ['string'])
+        ;
+
+        $resolver
+            ->setDefault('sign', '')
+            ->setAllowedTypes('sign', ['string'])
+        ;
 
         $resolver
             ->setDefault('mode', 'sandbox')

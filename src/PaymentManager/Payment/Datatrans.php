@@ -396,6 +396,8 @@ class Datatrans extends AbstractPayment implements PaymentInterface
             [
                 'datatrans_amount' => (string) $transaction['detail']['authorize']['amount'],
                 'datatrans_acqAuthorizationCode' => $data['acquirerAuthorizationCode'] ?? '',
+                'datatrans_paymentMethod' => (string) $transaction['paymentMethod'],
+                'datatrans_history' => json_encode($transaction['history']),
             ]
         );
     }

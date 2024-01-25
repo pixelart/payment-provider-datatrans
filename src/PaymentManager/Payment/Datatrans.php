@@ -146,6 +146,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
             $html = $this->container->get('twig')?->render('@PixelartPaymentProviderDatatrans/credit_card.html.twig', [
                 'config' => $config,
                 'transaction_id' => $transactionId,
+                'script' => $this->urls['secure_fields_js'],
             ]);
 
             $response = new SnippetResponse($order, $html ?? '');

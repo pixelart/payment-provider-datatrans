@@ -299,6 +299,82 @@ class Datatrans extends AbstractPayment implements PaymentInterface
             $response = new UrlResponse($order, $this->urls['redirect'].$transactionId);
         }
 
+        // @todo merge this into the klarna payment method and only pass different paymentMethods (DIB / KLN)
+        if ('sofort' === $config->getPaymentMethod()) {
+            $articles = [];
+
+            // Add modification to articles
+            foreach ($order->getPriceModifications()?->getItems() as $modification) {
+                if (!$modification->getAmount()) {
+                    continue;
+                }
+
+                // physical, discount, shipping_fee, sales_tax, digital, gift_card, store_credit, surcharge
+                $type = '';
+                if ('shipping' === $modification->getName()) {
+                    $type = 'shipping_fee';
+                } elseif ($modification->getAmount() < 0) {
+                    $type = 'discount';
+                } elseif ($modification->getAmount() > 0) {
+                    $type = 'surcharge';
+                }
+
+                /** @todo does not consider multiple tax percentage especially when added one-after-other (e.g. Quebec, CA) */
+                $taxPercentage = ($modification->getAmount() - $modification->getNetAmount()) * 100 / $modification->getNetAmount();
+                $articles[] = [
+                    'id' => $modification->getIndex(),
+                    'name' => $modification->getName(),
+                    'taxPercent' => $taxPercentage,
+                    'price' => Decimal::create($modification->getAmount())->mul(100)->asNumeric(),
+                    'quantity' => 1,
+                    'type' => $type,
+                ];
+            }
+
+            // Add order items to articles
+            foreach ($order->getItems() as $item) {
+                $itemQuantity = $item->getAmount();
+                $itemPrice = Decimal::create($item->getTotalPrice())->mul(100)->div($itemQuantity)->asNumeric();
+                $articles[] = [
+                    'id' => $item->getProductNumber(),
+                    'name' => $item->getProductName(),
+                    // @todo does not consider multiple tax percentage especially when added one-after-other (e.g. Quebec, CA)
+                    'taxPercent' => isset($item->getTaxInfo()[0][1]) ? rtrim($item->getTaxInfo()[0][1], '%') : 0,
+                    'price' => $itemPrice,
+                    'quantity' => $itemQuantity,
+                ];
+            }
+
+            $init = $this->client->request('POST', $this->urls['api'].'/v1/transactions', [
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=UTF-8',
+                ],
+                'auth' => [$this->merchantId, $this->password],
+                'json' => [
+                    'amount' => Decimal::create($order->getTotalPrice())->mul(100)->asNumeric(),
+                    'currency' => $price->getCurrency()->getShortName(),
+                    'refno' => $refNo,
+                    'customer' => [
+                        'country' => $order->getCustomerCountry(),
+                    ],
+                    'language' => $config->getLanguage() ?? 'en',
+                    'paymentMethods' => ['DIB'],
+                    'order' => [
+                        'articles' => $articles,
+                    ],
+                    'redirect' => [
+                        'successUrl' => $returnUrl,
+                        'cancelUrl' => $config->getCancelUrl(),
+                        'errorUrl' => $config->getErrorUrl(),
+                    ],
+                ],
+            ]);
+
+            $jsonResponse = json_decode($init->getBody()->getContents(), true);
+            $transactionId = $jsonResponse['transactionId'];
+            $response = new UrlResponse($order, $this->urls['redirect'].$transactionId);
+        }
+
         return $response;
     }
 

@@ -130,7 +130,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         }
 
         // @todo cleanup this condition (handles the redirect after a success from an ajax request to datatrans)
-        if ('paypal' === $config->getPaymentMethod() && $request?->isMethod('POST')) {
+        if ('paypal_button' === $config->getPaymentMethod() && $request?->isMethod('POST')) {
             $redirect = $request?->get('redirect');
             $transactionId = $request?->get('uppTransactionId');
             $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId);

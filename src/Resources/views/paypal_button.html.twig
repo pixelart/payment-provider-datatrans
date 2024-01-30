@@ -3,7 +3,6 @@
 <div id="paypalbutton" style="width: 400px; margin: 100px auto;"></div>
 
 <form id="paypal_form" method="POST">
-    <input type="hidden" id="paypal_redirect" name="redirect" value="" />
     <input type="hidden" id="paypal_transactionId" name="uppTransactionId" value="" />
 </form>
 
@@ -41,7 +40,6 @@
         // handle transaction result
         if (data.status === 'success') {
             console.log("authorized", data.transactionId);
-            document.getElementById('paypal_redirect').value = "{{ return_url }}"
             document.getElementById('paypal_transactionId').value = data.transactionId;
             document.getElementById('paypal_form').submit();
         }

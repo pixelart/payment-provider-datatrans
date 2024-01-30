@@ -191,7 +191,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                 'return_url' => $returnUrl,
                 'refno' => $refNo,
                 //                'total' => Decimal::create($order->getTotalPrice())->asNumeric(),
-                'total' => '20.55',
+                'total' => Decimal::create($order->getTotalPrice())->asString(),
                 'currency' => $price->getCurrency()->getShortName(),
                 'country' => $order->getCustomerCountry() ?: 'AT', // @todo remove the default AT
             ]);

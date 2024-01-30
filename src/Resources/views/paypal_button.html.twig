@@ -6,7 +6,7 @@
     PayPalButton.init({
         merchantId: '{{ merchant_id }}', // @todo set real merchant ID from yaml config or builder
         currencyCode: '{{ currency }}',
-        amount: "35,50",
+        amount: "{{ total }}",
         autoSettle: true,
         createAlias: false,
         reqType: 'CAA'

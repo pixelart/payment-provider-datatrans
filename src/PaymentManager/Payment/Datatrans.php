@@ -120,7 +120,17 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         $refNo = $orderAgent->getCurrentPendingPaymentInfo()?->getInternalPaymentId();
         $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo);
 
+        // @todo cleanup this condition (handles the redirect after a success from an ajax request to datatrans)
         if ('credit_card' === $config->getPaymentMethod() && $request?->isMethod('POST')) {
+            $redirect = $request?->get('redirect');
+            $transactionId = $request?->get('uppTransactionId');
+            $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId);
+
+            return new UrlResponse($order, $redirect ?: $returnUrl);
+        }
+
+        // @todo cleanup this condition (handles the redirect after a success from an ajax request to datatrans)
+        if ('paypal' === $config->getPaymentMethod() && $request?->isMethod('POST')) {
             $redirect = $request?->get('redirect');
             $transactionId = $request?->get('uppTransactionId');
             $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId);

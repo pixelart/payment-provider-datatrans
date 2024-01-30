@@ -2,6 +2,11 @@
 
 <div id="paypalbutton" style="width: 400px; margin: 100px auto;"></div>
 
+<form id="paypal_form" method="POST">
+    <input type="hidden" id="paypal_redirect" name="redirect" value="" />
+    <input type="hidden" id="paypal_transactionId" name="uppTransactionId" value="" />
+</form>
+
 <script type="text/javascript">
     PayPalButton.init({
         merchantId: '{{ merchant_id }}', // @todo set real merchant ID from yaml config or builder
@@ -34,6 +39,11 @@
 
     PayPalButton.on("authorization", function (data) {
         // handle transaction result
-        console.log(data);
+        if (data.status === 'success') {
+            console.log("authorized", data.transactionId);
+            document.getElementById('paypal_redirect').value = "{{ return_url }}"
+            document.getElementById('paypal_transactionId').value = data.transactionId;
+            document.getElementById('paypal_form').submit();
+        }
     });
 </script>

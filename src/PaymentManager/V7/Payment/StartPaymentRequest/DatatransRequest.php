@@ -36,6 +36,7 @@ class DatatransRequest extends AbstractRequest
     protected $cancelUrl;
     protected $useAlias;
     protected $merchantName;
+    protected $name;
 
     public function setPaymentMethod($paymentMethod): self
     {
@@ -179,5 +180,17 @@ class DatatransRequest extends AbstractRequest
     public function getMerchantName(): string
     {
         return $this->merchantName;
+    }
+
+    public function setName($name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 }

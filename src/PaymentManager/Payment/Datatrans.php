@@ -80,6 +80,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
 
         $params = [];
         $params['orderIdent'] = $query['orderIdent'] ?? null;
+        $params['refno2'] = urlencode($query['refno2'] ?? null);
         $params['uppTransactionId'] = $query['uppTransactionId'] ?? null;
         $params['timestamp'] = time();
 
@@ -87,6 +88,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
 
         $params['signature'] = hash_hmac('sha256', $unsignedUrl, $this->sign);
 
+        //        dd('signUrl', $url, $unsignedUrl);
         return strtok($url, '?').'?'.http_build_query($params);
     }
 
@@ -104,11 +106,13 @@ class Datatrans extends AbstractPayment implements PaymentInterface
 
         $params = [];
         $params['orderIdent'] = $query['orderIdent'] ?? null;
+        $params['refno2'] = $query['refno2'] ?? null;
         $params['uppTransactionId'] = $query['uppTransactionId'] ?? null;
         $params['timestamp'] = $timestamp;
 
         $unsignedUrl = strtok($url, '?').'?'.http_build_query($params);
 
+        //        dd('checkSignature', $url, $unsignedUrl, hash_hmac('sha256', $unsignedUrl, $this->sign));
         return $signature === hash_hmac('sha256', $unsignedUrl, $this->sign);
     }
 
@@ -118,13 +122,14 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         $request = $this->requestStack->getMainRequest();
         $order = $orderAgent->getOrder();
         $refNo = $orderAgent->getCurrentPendingPaymentInfo()?->getInternalPaymentId();
-        $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo);
+        $refNo2 = $config->getName();
+        $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&refno2='.$refNo2);
 
         // @todo cleanup this condition (handles the redirect after a success from an ajax request to datatrans)
         if ('credit_card' === $config->getPaymentMethod() && $request?->isMethod('POST')) {
             $redirect = $request?->get('redirect');
             $transactionId = $request?->get('uppTransactionId');
-            $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId);
+            $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId.'&refno2='.$refNo2);
 
             return new UrlResponse($order, $redirect ?: $returnUrl);
         }
@@ -133,7 +138,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         if ('paypal_button' === $config->getPaymentMethod() && $request?->isMethod('POST')) {
             $redirect = $request?->get('redirect');
             $transactionId = $request?->get('uppTransactionId');
-            $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId);
+            $returnUrl = $this->signUrl($config->getReturnUrl().'?orderIdent='.$refNo.'&uppTransactionId='.$transactionId.'&refno2='.$refNo2);
 
             return new UrlResponse($order, $redirect ?: $returnUrl);
         }
@@ -219,6 +224,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                     'amount' => Decimal::create($order->getTotalPrice())->mul(100)->asNumeric(),
                     'currency' => $price->getCurrency()->getShortName(),
                     'refno' => $refNo,
+                    'refno2' => $config->getName(),
                     'language' => $config->getLanguage() ?? 'en',
                     'paymentMethods' => ['TWI'],
                     'redirect' => [
@@ -288,6 +294,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                     'amount' => Decimal::create($order->getTotalPrice())->mul(100)->asNumeric(),
                     'currency' => $price->getCurrency()->getShortName(),
                     'refno' => $refNo,
+                    'refno2' => $config->getName(),
                     'customer' => [
                         'country' => $order->getCustomerCountry(),
                     ],
@@ -364,6 +371,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                     'amount' => Decimal::create($order->getTotalPrice())->mul(100)->asNumeric(),
                     'currency' => $price->getCurrency()->getShortName(),
                     'refno' => $refNo,
+                    'refno2' => $config->getName(),
                     'customer' => [
                         'country' => $order->getCustomerCountry(),
                     ],
@@ -392,6 +400,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
     {
         $transactionId = $response['datatransTrxId'] ?? $response['uppTransactionId'];
         $refNo = $response['orderIdent'];
+        $refNo2 = $response['refno2'];
 
         $url = $this->requestStack->getMainRequest()?->getUri();
         if (!$this->checkSignature($url)) {
@@ -422,6 +431,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                     'auth' => [$this->merchantId, $this->password],
                     'json' => [
                         'refno' => $refNo,
+                        'refno2' => str_replace('+', ' ', $refNo2),
                         'autoSettle' => $this->autoSettle,
                     ],
                 ]);
@@ -442,6 +452,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
                         'amount' => $transaction['detail']['authorize']['amount'],
                         'currency' => $transaction['currency'],
                         'refno' => $refNo,
+                        'refno2' => str_replace('+', ' ', $refNo2),
                         'autoSettle' => $this->autoSettle,
                     ],
                 ]);

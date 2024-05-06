@@ -182,9 +182,16 @@ class DatatransRequest extends AbstractRequest
         return $this->merchantName;
     }
 
+    /**
+     * the Name is used in refno2 in Datatrans API which is limited to 40 char.
+     *
+     * @todo throw an error instead of cutting the string
+     *
+     * @param mixed $name
+     */
     public function setName($name): self
     {
-        $this->name = $name;
+        $this->name = substr($name, 0, 40);
 
         return $this;
     }

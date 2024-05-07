@@ -198,6 +198,6 @@ class DatatransRequest extends AbstractRequest
 
     public function getName(): string
     {
-        return $this->name;
+        return substr($this->name, 0, 40);
     }
 }

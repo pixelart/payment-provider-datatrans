@@ -67,6 +67,21 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         return 'Datatrans';
     }
 
+    public function getMerchantId(): string
+    {
+        return $this->merchantId;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function getUrls(): array
+    {
+        return $this->urls;
+    }
+
     /*
      * Sign a URL.
      *

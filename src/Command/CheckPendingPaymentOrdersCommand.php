@@ -58,10 +58,10 @@ class CheckPendingPaymentOrdersCommand extends Command
 
         $orderManager = $this->orderManagers->getOrderManager();
 
-        // Abort orders with payment pending and modification date older than 1 hour
+        // Abort orders with payment pending and modification date within the last hour
         $list = $orderManager->buildOrderList();
         $list->setCondition(
-            'orderState = ? AND o_modificationDate < ?',
+            'orderState = ? AND o_modificationDate > ?',
             [AbstractOrder::ORDER_STATE_PAYMENT_PENDING, $timestamp]
         );
 

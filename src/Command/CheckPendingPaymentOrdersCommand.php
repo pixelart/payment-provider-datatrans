@@ -32,7 +32,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Status;
 use Pixelart\PaymentProviderDatatransBundle\PaymentManager\Payment\Datatrans;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -51,29 +50,15 @@ class CheckPendingPaymentOrdersCommand extends Command
         parent::__construct($name);
     }
 
-    protected function configure(): void
-    {
-        $this
-            ->addArgument('provider', InputArgument::OPTIONAL, 'The Pimcore payment_manager provider (e.g. datatrans)', 'datatrans')
-        ;
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $providerString = $input->getArgument('provider');
-        $provider = $this->factory->getPaymentManager()->getProvider($providerString);
-
-        if (!$provider instanceof Datatrans) {
-            return Command::FAILURE;
-        }
-
         $dateTime = new \DateTime();
         $dateTime->sub(new \DateInterval('PT1H'));
         $timestamp = $dateTime->getTimestamp();
 
         $orderManager = $this->orderManagers->getOrderManager();
 
-        // Abort orders with payment pending
+        // Abort orders with payment pending and modification date older than 1 hour
         $list = $orderManager->buildOrderList();
         $list->setCondition(
             'orderState = ? AND o_modificationDate < ?',
@@ -82,8 +67,14 @@ class CheckPendingPaymentOrdersCommand extends Command
 
         foreach ($list as $order) {
             $paymentInfo = $order->getLastPaymentInfo();
+            $providerData = $order->getPaymentProvider()?->getPaymentProviderDatatrans();
             $internalPaymentId = $paymentInfo?->getInternalPaymentId();
             $transactionId = $paymentInfo?->getPaymentReference();
+            $provider = $this->factory->getPaymentManager()->getProvider($providerData->getConfigurationKey());
+
+            if (!$provider instanceof Datatrans) {
+                continue;
+            }
 
             if (!$transactionId || !$internalPaymentId) {
                 continue;

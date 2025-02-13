@@ -2,6 +2,13 @@
 
 <div>NOTE: For testing use expiration Month and Year 06/25</div>
 
+<div class="col-12 mt-3 d-none" id="credit_card_error_box">
+    <div class="alert alert-error alert--icon" role="alert">
+        {{ svg('small-info', 'icon') }}
+        <div id="credit_card_error"></div>
+    </div>
+</div>
+
 {# documentation: https://docs.datatrans.ch/docs/secure-fields-options #}
 <form id="cc_form" method="post" style="width: 500px;margin: auto;">
     <input type="hidden" id="cc_redirect" name="redirect" value="" />
@@ -73,6 +80,8 @@
     });
     secureFields.on("error", function(data) {
         console.log("error", data);
+        document.getElementById('credit_card_error_box').classList.remove('d-none');
+        document.getElementById('credit_card_error').innerHTML = data.error;
     });
     document.getElementById("pay-button").onclick = function() {
         console.log("submit");
@@ -83,4 +92,5 @@
             expy: expyear,
         });
     };
+    console.log('test');
 </script>

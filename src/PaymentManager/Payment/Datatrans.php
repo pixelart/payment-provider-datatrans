@@ -134,6 +134,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
     /** @todo Refactor this function! Quickly done to get it working (needs better open-close principal and more abstraction). */
     public function startPayment(OrderAgentInterface $orderAgent, PriceInterface $price, AbstractRequest $config): StartPaymentResponseInterface
     {
+        $container = \Pimcore::getContainer();
         $request = $this->requestStack->getMainRequest();
         $order = $orderAgent->getOrder();
         $refNo = $orderAgent->getCurrentPendingPaymentInfo()?->getInternalPaymentId();
@@ -173,7 +174,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
             $jsonResponse = json_decode($init->getBody()->getContents(), true);
             $transactionId = $jsonResponse['transactionId'];
 
-            $html = $this->container->get('twig')?->render('@PixelartPaymentProviderDatatrans/credit_card.html.twig', [
+            $html = $container?->get('twig')?->render('@PixelartPaymentProviderDatatrans/credit_card.html.twig', [
                 'config' => $config,
                 'transaction_id' => $transactionId,
                 'script' => $this->urls['secure_fields_js'],
@@ -197,7 +198,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
              * @todo add shipping from price modifications to $displayItems[]
              * @todo add discount from price modifications to $displayItems[]
              */
-            $html = $this->container->get('twig')?->render('@PixelartPaymentProviderDatatrans/pay_button.html.twig', [
+            $html = $container?->get('twig')?->render('@PixelartPaymentProviderDatatrans/pay_button.html.twig', [
                 'config' => $config,
                 'script' => $this->urls['payment_button_js'],
                 'merchant_id' => $this->merchantId,
@@ -214,7 +215,7 @@ class Datatrans extends AbstractPayment implements PaymentInterface
         }
 
         if ('paypal_button' === $config->getPaymentMethod()) {
-            $html = $this->container->get('twig')?->render('@PixelartPaymentProviderDatatrans/paypal_button.html.twig', [
+            $html = $container?->get('twig')?->render('@PixelartPaymentProviderDatatrans/paypal_button.html.twig', [
                 'config' => $config,
                 'script' => $this->urls['paypal_button_js'],
                 'merchant_id' => $this->merchantId,

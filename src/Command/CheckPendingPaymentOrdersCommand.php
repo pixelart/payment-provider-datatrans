@@ -70,13 +70,14 @@ class CheckPendingPaymentOrdersCommand extends Command
             $providerData = $order->getPaymentProvider()?->getPaymentProviderDatatrans();
             $internalPaymentId = $paymentInfo?->getInternalPaymentId();
             $transactionId = $paymentInfo?->getPaymentReference();
-            $provider = $this->factory->getPaymentManager()->getProvider($providerData->getConfigurationKey());
 
-            if (!$provider instanceof Datatrans) {
+            if (!$providerData || !$transactionId || !$internalPaymentId) {
                 continue;
             }
 
-            if (!$transactionId || !$internalPaymentId) {
+            $provider = $this->factory->getPaymentManager()->getProvider($providerData->getConfigurationKey());
+
+            if (!$provider instanceof Datatrans) {
                 continue;
             }
 
